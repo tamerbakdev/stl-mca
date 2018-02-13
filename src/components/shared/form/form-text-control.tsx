@@ -70,6 +70,16 @@ export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes
     this.updateValue(value);
   }
 
+  private renderLabel() {
+    if (isValidString(this.label)) {
+      return (
+        <label htmlFor={ this.id } class="col-sm-3 col-form-label">
+          { this.label }
+        </label>
+      )
+    }
+  }
+
   public render() {
     const changesTarget = this.updateOn === 'blur' ? 'onChange' : 'onInput';
     const attrs = {
@@ -81,6 +91,13 @@ export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes
       [changesTarget]: (event) => this.handleInput(event)
     };
 
-    return <input { ...attrs } />
+    return (
+      <fieldset class="form-group row">
+        { this.renderLabel() }
+        <div class="col-sm-9">
+          <input { ...attrs } />
+        </div>
+      </fieldset>
+    )
   }
 }
