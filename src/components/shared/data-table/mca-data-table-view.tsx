@@ -9,7 +9,7 @@ import {
 } from '@stencil/core';
 
 import { DataTableState } from './mca-data-table';
-import { isNumber, isObject } from '../../mca-data-utils';
+import { isNumber, isObject, isEmptyArray } from '../../mca-data-utils';
 
 const DATA_TABLE_DEFAULT: DataTableState = {
   header: [],
@@ -42,6 +42,10 @@ export class McaDataTableView {
   }
 
   private renderRows() {
+    if (isEmptyArray(this.data.body)) {
+      return [];
+    }
+
     const currentTableBodyPage = this.data.body[this.data.currentPage - 1];
     return currentTableBodyPage.map(row => <tr>
       { row.map(col => <td>{ col }</td>) }
