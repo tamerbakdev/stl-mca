@@ -3,19 +3,17 @@ import { AbstractFormControl } from './form-control';
 import { TextualInputTypes, ValidationPredicate, ValidationError } from './form-contorl.model';
 import { isValidString, isEmptyArray } from '../../mca-data-utils';
 
-export type TextualFormControlValue
-  = string
-  | number;
+// export type TextualFormControlValue = any;
 
 @Component({
   tag: 'mca-form-text-control'
 })
-export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes, TextualFormControlValue> {
+export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes, any> {
   @Prop() private updateOn: 'blur' | 'key' = 'blur';
   @Prop() inputType: TextualInputTypes;
   @Prop() id: string;
   @Prop() name: string;
-  @Prop() value: TextualFormControlValue;
+  @Prop() value: any;
   @Prop() placeholder: string = null;
   @Prop() cssClasses: string = null;
   @Prop() label: string = null;
