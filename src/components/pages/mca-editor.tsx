@@ -41,12 +41,12 @@ export class McaEditorPage {
         label: 'Level',
         cssClasses: 'form-control'
       }
-    ]
+    ];
     return (
       <div class="mt-4">
         <div class="row">
           <div class="col-6 offset-md-3">
-            <mca-form-container controls={ controls } />
+            <mca-form-container controls={ controls } formId={ 'test-form' } />
           </div>
         </div>
       </div>
