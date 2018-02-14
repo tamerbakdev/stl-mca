@@ -25,7 +25,7 @@ export const isTruthy = (value: any) => {
     && value != null
     && value !== 0
     && value !== ''
-    && Number.isNaN(value);
+    && !Number.isNaN(value);
 }
 
 export const hasProperty = (obj: any, prop: string) => {
@@ -40,6 +40,10 @@ export const hasMethod = (obj: any, methodName: any) => {
     && isValidString(methodName)
     && methodName in obj
     && isFunction(obj[methodName]);
+}
+
+export const arrayFrom = function<T = any>(arrayLike: ArrayLike<T>) {
+  return Array.prototype.slice.call(arrayLike) as Array<T>;
 }
 
 export const snakeToTitleCase = (str: string) => {
