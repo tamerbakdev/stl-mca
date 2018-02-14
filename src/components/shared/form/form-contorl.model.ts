@@ -58,3 +58,10 @@ export interface AbstractFormControlOptions<InputTypes = TextualInputTypes, Valu
 export interface FormControlOptions<InputTypes = TextualInputTypes, ValueType = any> extends AbstractFormControlOptions<InputTypes, ValueType> {
   parentId: string;
 }
+
+export interface FormControlState<ValueType = any> {
+  isValid: boolean;
+  value: ValueType;
+  name: string;
+  id: string;
+}
