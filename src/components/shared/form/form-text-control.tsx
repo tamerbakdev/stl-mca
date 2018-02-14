@@ -1,13 +1,15 @@
 import {
   Component,
+  ComponentWillLoad,
   Event,
   Element,
   Prop,
   Watch,
-  EventEmitter
+  EventEmitter,
+  Method
 } from '@stencil/core';
 import { AbstractFormControl, AbstractFormControlNotifiers } from './form-control';
-import { TextualInputTypes, ValidationPredicate, ValidationError, AbstractFormControlOptions, FormControlOptions } from './form-contorl.model';
+import { TextualInputTypes, ValidationPredicate, ValidationError, AbstractFormControlOptions, FormControlOptions, FormControlState } from './form-contorl.model';
 import { isValidString, isEmptyArray } from '../../mca-data-utils';
 import { Subscription } from 'rxjs/Subscription';
 import { EventOptions } from '@stencil/core/dist/util/interfaces';
@@ -15,7 +17,7 @@ import { EventOptions } from '@stencil/core/dist/util/interfaces';
 @Component({
   tag: 'mca-form-text-control'
 })
-export class McaTextualFormControl extends AbstractFormControl {
+export class McaTextualFormControl extends AbstractFormControl implements ComponentWillLoad {
   @Prop() private updateOn: 'blur' | 'key' = 'blur';
   @Prop() public inputType: TextualInputTypes;
   @Prop() public id: string;
@@ -58,6 +60,16 @@ export class McaTextualFormControl extends AbstractFormControl {
     }
   }
 
+  @Method()
+  public getCurrentState(): FormControlState<string> {
+    return {
+      value: this.getControlValue(),
+      isValid: this.validationStatus,
+      name: this.name,
+      id: this.id
+    }
+  }
+
   @Event()
   private valueChanges: EventEmitter;
 
@@ -66,7 +78,36 @@ export class McaTextualFormControl extends AbstractFormControl {
 
   constructor() {
     super();
+  }
 
+  private handleInput(event) {
+    const value = event.target.value;
+
+    if (!isEmptyArray(this.validation)) {
+      const isValid = this.validation.every(validator => {
+        const result = validator(value);
+        return !(result instanceof ValidationError);
+      });
+
+      this.updateValidationStatus(isValid);
+
+      // TODO: map validation errors into local property
+    }
+
+    this.updateValue(value);
+  }
+
+  private renderLabel() {
+    if (isValidString(this.label)) {
+      return (
+        <label htmlFor={ this.id } class="col-sm-3 col-form-label">
+          { this.label }
+        </label>
+      )
+    }
+  }
+
+  public componentWillLoad() {
     const formControlConfig: FormControlOptions = {
       value: this.value,
       inputType: this.inputType,
@@ -86,31 +127,6 @@ export class McaTextualFormControl extends AbstractFormControl {
     this.init(formControlConfig, notifiers);
   }
 
-  private handleInput(event) {
-    const value = event.target.value;
-
-    if (!isEmptyArray(this.validation)) {
-      const isValid = this.validation.every(validator => {
-        const result = validator(value);
-        return !(result instanceof ValidationError);
-      });
-
-      this.updateValidationStatus(isValid);
-    }
-
-    this.updateValue(value);
-  }
-
-  private renderLabel() {
-    if (isValidString(this.label)) {
-      return (
-        <label htmlFor={ this.id } class="col-sm-3 col-form-label">
-          { this.label }
-        </label>
-      )
-    }
-  }
-
   public render() {
     const changesTarget = this.updateOn === 'blur' ? 'onChange' : 'onInput';
     const attrs = {
@@ -123,6 +139,7 @@ export class McaTextualFormControl extends AbstractFormControl {
     };
 
     this.host.setAttribute('data-parent-id', this.parentId);
+    this.host.setAttribute('data-control-id', this.id);
 
     return (
       <fieldset class="form-group row">
