@@ -65,14 +65,23 @@ export abstract class AbstractFormControl<InputTypes = TextualInputTypes, ValueT
     this.validation = config.validation || [];
 
     this._value = isValidString(config.value) ? config.value : null;
-    this._valueChanges$ = hasProperty(notifiers, 'valueChanges')
-      ? notifiers.valueChanges
-      : AbstractFormControlNotifierMock;
+    this._valueChanges$ = this.bindNotifier(notifiers, 'valueChanges');
 
     this._validationStatus = true;
-    this._validationStatusChanges$ = hasProperty(notifiers, 'validationStatusChanges')
-      ? notifiers.validationStatusChanges
-      : AbstractFormControlNotifierMock;
+    this._validationStatusChanges$ = this.bindNotifier(notifiers, 'validationStatusChanges');
+  }
+
+  /** Returns notifier(emitter) mock unless notifier object has repective method */
+  private bindNotifier(notifiers: AbstractFormControlNotifiers<ValueType>, notifier: string) {
+    if (
+      notifier != null
+      && hasProperty(notifiers, notifier)
+      && hasMethod(notifiers[notifier], 'emit')
+    ) {
+      return notifiers[notifier];
+    } else {
+      return { ...AbstractFormControlNotifierMock };
+    }
   }
 
   protected updateValidationStatus(isValid: boolean) {
@@ -89,6 +98,10 @@ export abstract class AbstractFormControl<InputTypes = TextualInputTypes, ValueT
       value: this._value,
       target: this.parentId
     });
+  }
+
+  protected getControlValue() {
+    return this._value;
   }
 }
 
