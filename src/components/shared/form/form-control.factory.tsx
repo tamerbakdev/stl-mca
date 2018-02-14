@@ -37,7 +37,7 @@ export const mediaInputTypes = [
   'color'
 ];
 
-export const matchFormControlComponent = (control: AbstractFormControlOptions) => {
+export const matchFormControlComponent = function<T extends AbstractFormControlOptions = AbstractFormControlOptions>(control: T) {
   switch (true) {
     case textualInputTypes.some(controlType => controlType === control.inputType):
     default:

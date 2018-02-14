@@ -1,23 +1,34 @@
-import { Component, Prop, Watch } from '@stencil/core';
-import { AbstractFormControl } from './form-control';
-import { TextualInputTypes, ValidationPredicate, ValidationError } from './form-contorl.model';
+import {
+  Component,
+  Event,
+  Element,
+  Prop,
+  Watch,
+  EventEmitter
+} from '@stencil/core';
+import { AbstractFormControl, AbstractFormControlNotifiers } from './form-control';
+import { TextualInputTypes, ValidationPredicate, ValidationError, AbstractFormControlOptions, FormControlOptions } from './form-contorl.model';
 import { isValidString, isEmptyArray } from '../../mca-data-utils';
-
-// export type TextualFormControlValue = any;
+import { Subscription } from 'rxjs/Subscription';
+import { EventOptions } from '@stencil/core/dist/util/interfaces';
 
 @Component({
   tag: 'mca-form-text-control'
 })
-export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes, any> {
+export class McaTextualFormControl extends AbstractFormControl {
   @Prop() private updateOn: 'blur' | 'key' = 'blur';
-  @Prop() inputType: TextualInputTypes;
-  @Prop() id: string;
-  @Prop() name: string;
-  @Prop() value: any;
-  @Prop() placeholder: string = null;
-  @Prop() cssClasses: string = null;
-  @Prop() label: string = null;
-  @Prop() validation: Array<ValidationPredicate> = [];
+  @Prop() public inputType: TextualInputTypes;
+  @Prop() public id: string;
+  @Prop() public parentId: string;
+  @Prop() public name: string;
+  @Prop() public value: any;
+  @Prop() public placeholder: string = null;
+  @Prop() public cssClasses: string = null;
+  @Prop() public label: string = null;
+  @Prop() public validation: Array<ValidationPredicate> = [];
+
+  @Element()
+  private host: HTMLElement;
 
   @Watch('type')
   private handleTypeChange(newValue: string, oldValue: string) {
@@ -33,6 +44,13 @@ export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes
     }
   }
 
+  @Watch('parentId')
+  private handleParentIdChange(newValue: string, oldValue: string) {
+    if (!isValidString(newValue)) {
+      throw new Error(`Attribute 'parentId' is required and must be valid(non-empty) string`);
+    }
+  }
+
   @Watch('name')
   private handleNameChange(newValue: string, oldValue: string) {
     if (!isValidString(newValue)) {
@@ -40,19 +58,32 @@ export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes
     }
   }
 
+  @Event()
+  private valueChanges: EventEmitter;
+
+  @Event()
+  private statusChanges: EventEmitter;
 
   constructor() {
     super();
-    this.init({
+
+    const formControlConfig: FormControlOptions = {
       value: this.value,
       inputType: this.inputType,
       id: this.id,
+      parentId: this.parentId,
       name: this.name,
       placeholder: this.placeholder,
       cssClasses: this.cssClasses,
       label: this.label,
       validation: this.validation
-    });
+    };
+    const notifiers: AbstractFormControlNotifiers<any> = {
+      valueChanges: this.valueChanges,
+      validationStatusChanges: this.statusChanges
+    }
+
+    this.init(formControlConfig, notifiers);
   }
 
   private handleInput(event) {
@@ -90,6 +121,8 @@ export class McaTextualFormControl extends AbstractFormControl<TextualInputTypes
       class: this.cssClasses,
       [changesTarget]: (event) => this.handleInput(event)
     };
+
+    this.host.setAttribute('data-parent-id', this.parentId);
 
     return (
       <fieldset class="form-group row">

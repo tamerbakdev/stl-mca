@@ -48,9 +48,13 @@ export interface AbstractFormControlOptions<InputTypes = TextualInputTypes, Valu
   inputType: InputTypes;
   id: string;
   name: string;
-  placeholder: string;
+  placeholder?: string;
   value?: ValueType;
   cssClasses?: string;
   label?: string;
   validation?: Array<ValidationPredicate>;
+}
+
+export interface FormControlOptions<InputTypes = TextualInputTypes, ValueType = any> extends AbstractFormControlOptions<InputTypes, ValueType> {
+  parentId: string;
 }
